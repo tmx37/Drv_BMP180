@@ -5,7 +5,9 @@
  *      Author: tmx37
  */
 
-#include "DrvGY_BMP180.h"
+#include <math.h>
+
+#include "Drv_BMP180.h"
 
 /******************************************************************************
  * Module Preprocessor Constants
@@ -28,13 +30,13 @@
  * Module Variable Definitions
  ******************************************************************************/
 
-static DrvGY_BMP180_WriteRegistersCB_t 	mWriteRegistersCB;
-static DrvGY_BMP180_ReadRegisterCB_t 	mReadRegistersCB;
-static DrvGY_BMP180_IsDeviceReadyCB_t	mIsDeviceReadyCB;
+static Drv_BMP180_WriteRegCB_t 		mWriteRegCB;
+static Drv_BMP180_ReadRegCB_t 		mReadRegCB;
+static Drv_BMP180_IsDeviceReadyCB_t	mIsDeviceReadyCB;
 
-static DrvGYBMP180_TemperatureUnit 	mTemperatureUnit;
-static DrvGYBMP180_AltitudeUnit 	mAltitudeUnit;
-static DrvGYBMP180_PressureUnit		mPressureUnit;
+static Drv_BMP180_TempUnit 	mTempUnit;
+static Drv_BMP180_AltUnit 	mAltUnit;
+static Drv_BMP180_PresUnit	mPresUnit;
 
 static uint16_t 	AC1, AC4, AC5, AC6, B1, MD 	= 	0;
 static int16_t 	AC2, AC3, MB, MC			= 	0;
@@ -64,13 +66,13 @@ static uint8_t FailedTransmission = 0;
 /******************************************************************************
  * Function Definitions Private`
  ******************************************************************************/
-UtlGen_Err_t BMP180_Calibration(void)
+GenUtl_Err_t CalibrationRoutine(void)
 {
 	uint8_t Callib_Data[22] = {0};
 
-	mReadRegistersCB(0, BMP180_READ, CALLIB_START, Callib_Data, 22);
+	mReadRegCB(0, BMP180_READ, CALLIB_START, Callib_Data, 22);
 
-	if(!sizeof(Callib_Data)) return UTLGEN_ERR_NOT_FOUND;
+	if(!sizeof(Callib_Data)) return OUT_ERR_NOT_FOUND;
 
 	AC1 = ((Callib_Data[0] << 8) | Callib_Data[1]);
 	AC2 = ((Callib_Data[2] << 8) | Callib_Data[3]);
@@ -84,31 +86,31 @@ UtlGen_Err_t BMP180_Calibration(void)
 	MC = ((Callib_Data[18] << 8) | Callib_Data[19]);
 	MD = ((Callib_Data[20] << 8) | Callib_Data[21]);
 
-	return UTLGEN_OK;
+	return OUT_OK;
 }
 
 /******************************************************************************
  * Function Definitions Public
  ******************************************************************************/
 
-UtlGen_Err_t DrvGY_BMP180_Init(const DrvGYBMP180_Config_t *pConfigData)
+GenUtl_Err_t Drv_BMP180_Init(const Drv_BMP180_Cfg_t *pConfigData)
 {
-	mWriteRegistersCB = pConfigData->pfWriteRegistersI2cCB;
-	mReadRegistersCB = pConfigData->pfReadRegisterI2cCB;
+	mWriteRegCB = pConfigData->pfWriteRegistersI2cCB;
+	mReadRegCB = pConfigData->pfReadRegisterI2cCB;
 	mIsDeviceReadyCB = pConfigData->pfIsDeviceReadyI2cCB;
 
 	oss = pConfigData->oversampling_setting;
 	pres_45ms_control_data = 0x34+(oss<<6);
 
-	mTemperatureUnit = CELSIUS;
-	mPressureUnit = PASCAL;
-	mAltitudeUnit = METER;
+	mTempUnit = CELSIUS;
+	mPresUnit = PASCAL;
+	mAltUnit = METER;
 
-	if(isDeviceReady() != UTLGEN_OK) return UTLGEN_ERR_BUS_CONTENTION;
+	if(isDeviceReady() != OUT_OK) return OUT_ERR_BUS_CONTENTION;
 
-	if(BMP180_Calibration() != UTLGEN_OK) return UTLGEN_ERR_NOT_READY;
+	if(CalibrationRoutine() != OUT_OK) return OUT_ERR_NOT_READY;
 
-	return UTLGEN_OK;
+	return OUT_OK;
 }
 
 int32_t getTemperature()
@@ -116,9 +118,9 @@ int32_t getTemperature()
 	/**
 	 * bmp180_get_ut
 	 */
-	mWriteRegistersCB(0, BMP180_WRITE, CONTROL_REG, &temp_45ms_control_data, 1); // avvio al registro di controllo il valore per accedere alla temperatura salvata in EEPROM
+	mWriteRegCB(0, BMP180_WRITE, CONTROL_REG, &temp_45ms_control_data, 1); // avvio al registro di controllo il valore per accedere alla temperatura salvata in EEPROM
 	HAL_Delay(5); //4,5 ms for device ready-to-trasmit state, by doc
-	mReadRegistersCB(0, BMP180_READ, out_msb_reg_addr, Temp_DataRAW, 2); // leso la temperatura al registro "out_msb" e "out_lsb": insieme fanno la temperatura raw
+	mReadRegCB(0, BMP180_READ, out_msb_reg_addr, Temp_DataRAW, 2); // leso la temperatura al registro "out_msb" e "out_lsb": insieme fanno la temperatura raw
 
 	Raw_Temp = (Temp_DataRAW[0]<< 8) +  Temp_DataRAW[1]; // viene restituio a 2 valori quindi devo convertire in un valore uint16 univoco
 
@@ -138,9 +140,13 @@ int32_t getPressure()
 	/**
 	 * bmp180_get_up
 	 */
-	mWriteRegistersCB(0, BMP180_WRITE, CONTROL_REG, &pres_45ms_control_data, 1);
+	mWriteRegCB(0, BMP180_WRITE, CONTROL_REG, &pres_45ms_control_data, 1);
 	switch (oss)
 	{
+		/**
+		 * NB: 	This could result in important time loss during readings. 
+		 * 		Evaluate if to do only on init or with consequential readings "una tantum" by the upward logics.
+		 */
 		case (0):
 				HAL_Delay (5);
 				break;
@@ -154,7 +160,7 @@ int32_t getPressure()
 				HAL_Delay (26);
 				break;
 	}
-	mReadRegistersCB(0, BMP180_READ, out_msb_reg_addr, Pres_DataRAW, 3);
+	mReadRegCB(0, BMP180_READ, out_msb_reg_addr, Pres_DataRAW, 3);
 
 	Raw_Pres = ((Pres_DataRAW[0] << 16) + (Pres_DataRAW[1] << 8) + Pres_DataRAW[2]) >> (8 - oss);
 
@@ -190,38 +196,38 @@ int32_t getAltitude()
 	return Altitude;
 }
 
-UtlGen_Err_t isDeviceReady()
+GenUtl_Err_t isDeviceReady()
 {
 	if (!mIsDeviceReadyCB(0, BMP180_WRITE, 5) || !mIsDeviceReadyCB(0, BMP180_READ, 5))
-		return UTLGEN_OK;
+		return OUT_OK;
 	else
 	{
 		if(FailedTransmission >= 10)
-			return UTLGEN_ERR_BUS_CONTENTION;
+			return OUT_ERR_BUS_CONTENTION;
 		FailedTransmission += 1;
 		isDeviceReady();
 	}
-	return UTLGEN_ERR_BUSY;
+	return OUT_ERR_BUSY;
 }
 
-void setTemperatureUnit(DrvGYBMP180_TemperatureUnit unit)
+void setTemperatureUnit(Drv_BMP180_TempUnit unit)
 {
-	mTemperatureUnit = unit;
+	mTempUnit = unit;
 }
 
-void setPressureUnit(DrvGYBMP180_PressureUnit unit)
+void setPressureUnit(Drv_BMP180_PresUnit unit)
 {
-	mPressureUnit = unit;
+	mPresUnit = unit;
 }
 
-void setAltitudeUnit(DrvGYBMP180_AltitudeUnit unit)
+void setAltitudeUnit(Drv_BMP180_AltUnit unit)
 {
-	mAltitudeUnit = unit;
+	mAltUnit = unit;
 }
 
-int32_t convTemp(uint8_t value, DrvGYBMP180_TemperatureUnit unit)
+int32_t convTemp(uint8_t value, Drv_BMP180_TempUnit unit)
 {
-	switch (mTemperatureUnit){
+	switch (mTempUnit){
 	case KELVIN:
 		if(unit == CELSIUS) return ( value - 273 );
 		else if(unit == FAHRENHEIT) return ( 1.8 * (value - 273.15) + 32 );
@@ -238,9 +244,9 @@ int32_t convTemp(uint8_t value, DrvGYBMP180_TemperatureUnit unit)
 	return value;
 }
 
-int32_t convPres(uint8_t value, DrvGYBMP180_PressureUnit unit)
+int32_t convPres(uint8_t value, Drv_BMP180_PresUnit unit)
 {
-	switch (mPressureUnit){
+	switch (mPresUnit){
 	case PASCAL:
 		if(unit == HPASCAL) return ( value / 100 );
 		break;
@@ -251,9 +257,9 @@ int32_t convPres(uint8_t value, DrvGYBMP180_PressureUnit unit)
 	return value;
 }
 
-int32_t convAltitude(uint8_t value, DrvGYBMP180_AltitudeUnit unit)
+int32_t convAltitude(uint8_t value, Drv_BMP180_AltUnit unit)
 {
-	switch (mAltitudeUnit){
+	switch (mAltUnit){
 	case METER:
 		if(unit == FEET) return ( value * 3.3 );
 		break;

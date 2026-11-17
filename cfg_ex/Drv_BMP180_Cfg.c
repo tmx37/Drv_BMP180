@@ -25,11 +25,15 @@
   * Function Prototypes Private
   ******************************************************************************/
 
+uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
+
  /******************************************************************************
   * Module Variable Definitions
   ******************************************************************************/
 
-static DrvGYBMP180_Config_t mConfigData;
+static Drv_BMP180_Cfg_t mConfigData;
 
  /******************************************************************************
   * Function Definitions Private
@@ -39,17 +43,39 @@ static DrvGYBMP180_Config_t mConfigData;
   * Function Definitions Public
   ******************************************************************************/
 
-UtlGen_Err_t DrvGYBMP180Cfg_Init(void)
+GenUtl_Err_t  DrvGYBMP180Cfg_Init(void)
 {
-	UtlGen_Err_t ErrCode;
+	GenUtl_Err_t ErrCode;
+
 	mConfigData.I2CInst = 0;
-	mConfigData.pfWriteRegistersI2cCB = DrvI2c_WriteRegister;
-	mConfigData.pfReadRegisterI2cCB = DrvI2c_ReadRegister;
-	mConfigData.pfIsDeviceReadyI2cCB = DrvI2c_IsDeviceReady;
+	mConfigData.pfWriteRegistersI2cCB = MockWriteI2CReg;
+	mConfigData.pfReadRegisterI2cCB = MockReadI2CReg;
+	mConfigData.pfIsDeviceReadyI2cCB = MockIsDeviceReady;
 	mConfigData.oversampling_setting = 3;
 
-	ErrCode = DrvGY_BMP180_Init(&mConfigData);
+	ErrCode = Drv_BMP180_Init(&mConfigData);
 	return ErrCode;
 }
+
+uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+{
+  return OUT_OK;
+}
+
+uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+{
+  return OUT_OK;
+}
+
+uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials)
+{
+  return OUT_OK;
+}
+
+void HAL_Delay(uint32_t Delay)
+{
+  (void)Delay;
+}
+
 
 /*** End of File **************************************************************/

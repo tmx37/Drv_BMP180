@@ -12,11 +12,11 @@
  * Includes
  ******************************************************************************/
 
-#include "math.h"
+ #include "GenUtl.h"
+
  /******************************************************************************
  * Preprocessor Constants
  ******************************************************************************/
-
 
  /******************************************************************************
  * Preprocessor Constants
@@ -46,7 +46,11 @@
 extern "C" {
 #endif
 
-UtlGen_Err_t DrvGYBMP180Cfg_Init(void);
+GenUtl_Err_t DrvGYBMP180Cfg_Init(void);
+
+/* Millisecond delay used by the driver. On the STM32 target this is provided
+ * by the HAL (include the HAL header here instead); this example cfg mocks it. */
+void HAL_Delay(uint32_t Delay);
 
 #ifdef __cplusplus
 } /* extern "C" */
