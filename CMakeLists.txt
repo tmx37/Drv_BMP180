@@ -10,7 +10,7 @@ else() # Create new target
   # add name of the library
   set(LIBRARY_NAME DRVBMP180)
 
-  PROJECT(${LIBRARY_NAME})
+  PROJECT(${LIBRARY_NAME} C ASM)
 
   if (NOT CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     message(STATUS "This project [${LIBRARY_NAME}] has a top-level one called [${CMAKE_PROJECT_NAME}]")
