@@ -9,7 +9,4 @@ manifest:
       remote: tmx37_github
       repo-path: GenUtl_EmbeddedC
       revision: develop
-      path: Drv_BMP180/module_libs
-
-self: 
-  path: Drv_BMP180/Drivers
+      path: module_libs

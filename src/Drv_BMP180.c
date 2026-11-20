@@ -70,7 +70,7 @@ GenUtl_Err_t CalibrationRoutine(void)
 {
 	uint8_t Callib_Data[22] = {0};
 
-	mReadRegCB(0, BMP180_READ, CALLIB_START, Callib_Data, 22);
+	mReadRegCB(BMP180_READ, CALLIB_START, Callib_Data, 22);
 
 	if(!sizeof(Callib_Data)) return OUT_ERR_NOT_FOUND;
 
@@ -118,9 +118,9 @@ int32_t getTemperature()
 	/**
 	 * bmp180_get_ut
 	 */
-	mWriteRegCB(0, BMP180_WRITE, CONTROL_REG, &temp_45ms_control_data, 1); // avvio al registro di controllo il valore per accedere alla temperatura salvata in EEPROM
+	mWriteRegCB(BMP180_WRITE, CONTROL_REG, &temp_45ms_control_data, 1); // avvio al registro di controllo il valore per accedere alla temperatura salvata in EEPROM
 	HAL_Delay(5); //4,5 ms for device ready-to-trasmit state, by doc
-	mReadRegCB(0, BMP180_READ, out_msb_reg_addr, Temp_DataRAW, 2); // leso la temperatura al registro "out_msb" e "out_lsb": insieme fanno la temperatura raw
+	mReadRegCB(BMP180_READ, out_msb_reg_addr, Temp_DataRAW, 2); // leso la temperatura al registro "out_msb" e "out_lsb": insieme fanno la temperatura raw
 
 	Raw_Temp = (Temp_DataRAW[0]<< 8) +  Temp_DataRAW[1]; // viene restituio a 2 valori quindi devo convertire in un valore uint16 univoco
 
@@ -140,7 +140,7 @@ int32_t getPressure()
 	/**
 	 * bmp180_get_up
 	 */
-	mWriteRegCB(0, BMP180_WRITE, CONTROL_REG, &pres_45ms_control_data, 1);
+	mWriteRegCB(BMP180_WRITE, CONTROL_REG, &pres_45ms_control_data, 1);
 	switch (oss)
 	{
 		/**
@@ -160,7 +160,7 @@ int32_t getPressure()
 				HAL_Delay (26);
 				break;
 	}
-	mReadRegCB(0, BMP180_READ, out_msb_reg_addr, Pres_DataRAW, 3);
+	mReadRegCB(BMP180_READ, out_msb_reg_addr, Pres_DataRAW, 3);
 
 	Raw_Pres = ((Pres_DataRAW[0] << 16) + (Pres_DataRAW[1] << 8) + Pres_DataRAW[2]) >> (8 - oss);
 
@@ -198,7 +198,7 @@ int32_t getAltitude()
 
 GenUtl_Err_t isDeviceReady()
 {
-	if (!mIsDeviceReadyCB(0, BMP180_WRITE, 5) || !mIsDeviceReadyCB(0, BMP180_READ, 5))
+	if (!mIsDeviceReadyCB(BMP180_WRITE, 5) || !mIsDeviceReadyCB(BMP180_READ, 5))
 		return OUT_OK;
 	else
 	{

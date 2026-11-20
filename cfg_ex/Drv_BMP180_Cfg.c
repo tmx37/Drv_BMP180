@@ -25,9 +25,9 @@
   * Function Prototypes Private
   ******************************************************************************/
 
-uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
+uint32_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+uint32_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials);
 
  /******************************************************************************
   * Module Variable Definitions
@@ -46,8 +46,6 @@ static Drv_BMP180_Cfg_t mConfigData;
 GenUtl_Err_t  DrvGYBMP180Cfg_Init(void)
 {
 	GenUtl_Err_t ErrCode;
-
-	mConfigData.I2CInst = 0;
 	mConfigData.pfWriteRegistersI2cCB = MockWriteI2CReg;
 	mConfigData.pfReadRegisterI2cCB = MockReadI2CReg;
 	mConfigData.pfIsDeviceReadyI2cCB = MockIsDeviceReady;
@@ -57,17 +55,17 @@ GenUtl_Err_t  DrvGYBMP180Cfg_Init(void)
 	return ErrCode;
 }
 
-uint32_t MockWriteI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+uint32_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
 {
   return OUT_OK;
 }
 
-uint32_t MockReadI2CReg(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+uint32_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
 {
   return OUT_OK;
 }
 
-uint32_t MockIsDeviceReady(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials)
+uint32_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials)
 {
   return OUT_OK;
 }

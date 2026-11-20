@@ -37,18 +37,17 @@ typedef enum
 	FEET
 } Drv_BMP180_AltUnit;
 
-typedef uint32_t (*Drv_BMP180_WriteRegCB_t)(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef uint32_t (*Drv_BMP180_WriteRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
 
-typedef uint32_t (*Drv_BMP180_ReadRegCB_t)(uint32_t I2cInst, uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef uint32_t (*Drv_BMP180_ReadRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
 
-typedef uint32_t (*Drv_BMP180_IsDeviceReadyCB_t)(uint32_t I2cInst, uint8_t DevAddr, uint8_t nTrials);
+typedef uint32_t (*Drv_BMP180_IsDeviceReadyCB_t)(uint8_t DevAddr, uint8_t nTrials);
 
 /**
  * BMP180 configuration istance
  */
 typedef struct
 {
-	uint8_t I2CInst;	// solo una istanza I2C dato che su GY-85 è sempre e solo una (????)
 	Drv_BMP180_WriteRegCB_t pfWriteRegistersI2cCB;
 	Drv_BMP180_ReadRegCB_t pfReadRegisterI2cCB;
 	Drv_BMP180_IsDeviceReadyCB_t pfIsDeviceReadyI2cCB;
