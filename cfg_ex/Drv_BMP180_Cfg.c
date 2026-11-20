@@ -25,9 +25,9 @@
   * Function Prototypes Private
   ******************************************************************************/
 
-uint32_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-uint32_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
-uint32_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials);
+GenUtl_Err_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+GenUtl_Err_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+GenUtl_Err_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials);
 
  /******************************************************************************
   * Module Variable Definitions
@@ -55,24 +55,19 @@ GenUtl_Err_t  DrvGYBMP180Cfg_Init(void)
 	return ErrCode;
 }
 
-uint32_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+GenUtl_Err_t MockWriteI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
 {
   return OUT_OK;
 }
 
-uint32_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
+GenUtl_Err_t MockReadI2CReg(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize)
 {
   return OUT_OK;
 }
 
-uint32_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials)
+GenUtl_Err_t MockIsDeviceReady(uint8_t DevAddr, uint8_t nTrials)
 {
   return OUT_OK;
-}
-
-void HAL_Delay(uint32_t Delay)
-{
-  (void)Delay;
 }
 
 

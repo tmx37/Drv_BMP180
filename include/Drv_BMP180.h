@@ -37,11 +37,11 @@ typedef enum
 	FEET
 } Drv_BMP180_AltUnit;
 
-typedef uint32_t (*Drv_BMP180_WriteRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef GenUtl_Err_t (*Drv_BMP180_WriteRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
 
-typedef uint32_t (*Drv_BMP180_ReadRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
+typedef GenUtl_Err_t (*Drv_BMP180_ReadRegCB_t)(uint8_t DevAddr, uint8_t RegNdx, uint8_t *pDataBuffer, uint32_t DataSize);
 
-typedef uint32_t (*Drv_BMP180_IsDeviceReadyCB_t)(uint8_t DevAddr, uint8_t nTrials);
+typedef GenUtl_Err_t (*Drv_BMP180_IsDeviceReadyCB_t)(uint8_t DevAddr, uint8_t nTrials);
 
 /**
  * BMP180 configuration istance
